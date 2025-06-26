@@ -11,7 +11,7 @@ export default function Home() {
   const [searchResult, setSearchResult] = useState(null);
   const [editingTask, setEditingTask] = useState(null);
 
-  const backendURL = "http://127.0.0.1:5000";
+  const backendURL = "https://mini-task-manager-fullstack.onrender.com";
 
   const fetchAllTasks = async () => {
     const res = await axios.get(`${backendURL}/tasks`);
