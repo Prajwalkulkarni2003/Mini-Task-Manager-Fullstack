@@ -132,14 +132,30 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Search Result */}
+        {/* Search Result with Delete Button */}
         {searchResult && (
           <div className="border p-4 rounded bg-green-50 mt-4">
-            <h2 className="text-lg font-semibold text-green-800">Search Result:</h2>
-            <p><strong>ID:</strong> {searchResult.id}</p>
-            <p><strong>Title:</strong> {searchResult.title}</p>
-            <p><strong>Status:</strong> {searchResult.status}</p>
-            <p><strong>Created:</strong> {searchResult.createdAt}</p>
+            <h2 className="text-lg font-semibold text-green-800">
+              Search Result:
+            </h2>
+            <p>
+              <strong>ID:</strong> {searchResult.id} |{" "}
+              <strong>Title:</strong> {searchResult.title}
+            </p>
+            <p>
+              <strong>Status:</strong> {searchResult.status}
+            </p>
+            <p>
+              <strong>Created:</strong> {searchResult.createdAt}
+            </p>
+            <div className="mt-2">
+              <button
+                onClick={() => handleDelete(searchResult.id)}
+                className="bg-red-600 text-white px-3 py-1 rounded"
+              >
+                Delete This Task
+              </button>
+            </div>
           </div>
         )}
 
@@ -154,9 +170,13 @@ export default function Home() {
                   className="p-2 flex justify-between items-center"
                 >
                   <div>
-                    <p><strong>Title:</strong> {task.title}</p>
+                    <p>
+                      <strong>ID:</strong> {task.id} |{" "}
+                      <strong>Title:</strong> {task.title}
+                    </p>
                     <p className="text-sm text-gray-500">
-                      <strong>Status:</strong> {task.status} | <strong>Created:</strong> {task.createdAt}
+                      <strong>Status:</strong> {task.status} |{" "}
+                      <strong>Created:</strong> {task.createdAt}
                     </p>
                   </div>
                   <div className="space-x-2">
