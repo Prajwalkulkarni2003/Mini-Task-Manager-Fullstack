@@ -8,11 +8,13 @@ export default function Home() {
   const [title, setTitle] = useState("");
   const [status, setStatus] = useState("pending");
   const [searchTitle, setSearchTitle] = useState("");
+  const [searchId, setSearchId] = useState("");
   const [searchResult, setSearchResult] = useState(null);
   const [editingTask, setEditingTask] = useState(null);
 
   const backendURL = "https://mini-task-manager-fullstack.onrender.com";
 
+  // Fetch all tasks
   const fetchAllTasks = async () => {
     const res = await axios.get(`${backendURL}/tasks`);
     setTasks(res.data);
@@ -22,6 +24,7 @@ export default function Home() {
     setStatus("pending");
   };
 
+  // Add task
   const handleAdd = async () => {
     if (!title.trim()) return;
 
@@ -35,7 +38,8 @@ export default function Home() {
     fetchAllTasks();
   };
 
-  const handleSearch = async () => {
+  // Search by title
+  const handleSearchByTitle = async () => {
     const res = await axios.get(`${backendURL}/tasks`);
     const task = res.data.find(
       (t) => t.title.toLowerCase() === searchTitle.toLowerCase()
@@ -45,17 +49,33 @@ export default function Home() {
     setEditingTask(null);
   };
 
+  // Search by ID
+  const handleSearchById = async () => {
+    if (!searchId.trim()) return;
+    try {
+      const res = await axios.get(`${backendURL}/tasks/${searchId}`);
+      setSearchResult(res.data);
+      setTasks([]);
+      setEditingTask(null);
+    } catch (error) {
+      setSearchResult(null);
+      alert("Task not found with that ID");
+    }
+  };
+
+  // Edit task
   const handleEdit = (task) => {
     setEditingTask(task);
-    setTitle(task.title); // Read-only
+    setTitle(task.title);
     setStatus(task.status);
   };
 
+  // Update task
   const handleUpdate = async () => {
     if (!editingTask) return;
 
     await axios.put(`${backendURL}/tasks/${editingTask.id}`, {
-      title: editingTask.title, // keep title same
+      title: editingTask.title,
       status,
     });
 
@@ -65,6 +85,7 @@ export default function Home() {
     fetchAllTasks();
   };
 
+  // Delete task
   const handleDelete = async (id) => {
     await axios.delete(`${backendURL}/tasks/${id}`);
     fetchAllTasks();
@@ -79,14 +100,14 @@ export default function Home() {
       <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow space-y-6">
         <h1 className="text-2xl font-bold">Mini Task Manager</h1>
 
-        {/* Add or Edit Task (Only Status Editable in Edit Mode) */}
+        {/* Add or Edit Task */}
         <div className="flex flex-col md:flex-row gap-2">
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="flex-1 p-2 border rounded"
             placeholder="Enter task title"
-            disabled={editingTask} // Disable title editing when editing
+            disabled={editingTask}
           />
           <select
             value={status}
@@ -106,8 +127,8 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Search Task */}
-        <div className="flex gap-2">
+        {/* Search by Title */}
+        <div className="flex flex-col md:flex-row gap-2">
           <input
             value={searchTitle}
             onChange={(e) => setSearchTitle(e.target.value)}
@@ -115,10 +136,26 @@ export default function Home() {
             placeholder="Search by title"
           />
           <button
-            onClick={handleSearch}
+            onClick={handleSearchByTitle}
             className="bg-green-600 text-white px-4 py-2 rounded"
           >
-            Search Task
+            Search by Title
+          </button>
+        </div>
+
+        {/* Search by ID */}
+        <div className="flex flex-col md:flex-row gap-2 mt-2">
+          <input
+            value={searchId}
+            onChange={(e) => setSearchId(e.target.value)}
+            className="flex-1 p-2 border rounded"
+            placeholder="Search by ID"
+          />
+          <button
+            onClick={handleSearchById}
+            className="bg-purple-600 text-white px-4 py-2 rounded"
+          >
+            Search by ID
           </button>
         </div>
 
@@ -126,13 +163,13 @@ export default function Home() {
         <div>
           <button
             onClick={fetchAllTasks}
-            className="bg-gray-800 text-white px-4 py-2 rounded"
+            className="bg-gray-800 text-white px-4 py-2 rounded mt-2"
           >
             Get All Tasks
           </button>
         </div>
 
-        {/* Search Result with Delete Button */}
+        {/* Search Result */}
         {searchResult && (
           <div className="border p-4 rounded bg-green-50 mt-4">
             <h2 className="text-lg font-semibold text-green-800">
@@ -159,7 +196,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* All Tasks */}
+        {/* All Tasks List */}
         {tasks.length > 0 && (
           <div className="mt-4">
             <h2 className="text-lg font-semibold">All Tasks:</h2>
