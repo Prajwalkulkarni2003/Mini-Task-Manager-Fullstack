@@ -8,23 +8,20 @@ export default function Home() {
   const [title, setTitle] = useState("");
   const [status, setStatus] = useState("pending");
   const [searchTitle, setSearchTitle] = useState("");
-  const [searchId, setSearchId] = useState("");
-  const [searchResult, setSearchResult] = useState(null);
+  const [searchResults, setSearchResults] = useState([]);
   const [editingTask, setEditingTask] = useState(null);
 
   const backendURL = "https://mini-task-manager-fullstack.onrender.com";
 
-  // Fetch all tasks
   const fetchAllTasks = async () => {
     const res = await axios.get(`${backendURL}/tasks`);
     setTasks(res.data);
-    setSearchResult(null);
+    setSearchResults([]);
     setEditingTask(null);
     setTitle("");
     setStatus("pending");
   };
 
-  // Add task
   const handleAdd = async () => {
     if (!title.trim()) return;
 
@@ -38,39 +35,22 @@ export default function Home() {
     fetchAllTasks();
   };
 
-  // Search by title
   const handleSearchByTitle = async () => {
     const res = await axios.get(`${backendURL}/tasks`);
-    const task = res.data.find(
+    const matched = res.data.filter(
       (t) => t.title.toLowerCase() === searchTitle.toLowerCase()
     );
-    setSearchResult(task || null);
+    setSearchResults(matched);
     setTasks([]);
     setEditingTask(null);
   };
 
-  // Search by ID
-  const handleSearchById = async () => {
-    if (!searchId.trim()) return;
-    try {
-      const res = await axios.get(`${backendURL}/tasks/${searchId}`);
-      setSearchResult(res.data);
-      setTasks([]);
-      setEditingTask(null);
-    } catch (error) {
-      setSearchResult(null);
-      alert("Task not found with that ID");
-    }
-  };
-
-  // Edit task
   const handleEdit = (task) => {
     setEditingTask(task);
     setTitle(task.title);
     setStatus(task.status);
   };
 
-  // Update task
   const handleUpdate = async () => {
     if (!editingTask) return;
 
@@ -85,7 +65,6 @@ export default function Home() {
     fetchAllTasks();
   };
 
-  // Delete task
   const handleDelete = async (id) => {
     await axios.delete(`${backendURL}/tasks/${id}`);
     fetchAllTasks();
@@ -128,34 +107,18 @@ export default function Home() {
         </div>
 
         {/* Search by Title */}
-        <div className="flex flex-col md:flex-row gap-2">
+        <div className="flex gap-2">
           <input
             value={searchTitle}
             onChange={(e) => setSearchTitle(e.target.value)}
             className="flex-1 p-2 border rounded"
-            placeholder="Search by title"
+            placeholder="Search tasks by title"
           />
           <button
             onClick={handleSearchByTitle}
             className="bg-green-600 text-white px-4 py-2 rounded"
           >
-            Search by Title
-          </button>
-        </div>
-
-        {/* Search by ID */}
-        <div className="flex flex-col md:flex-row gap-2 mt-2">
-          <input
-            value={searchId}
-            onChange={(e) => setSearchId(e.target.value)}
-            className="flex-1 p-2 border rounded"
-            placeholder="Search by ID"
-          />
-          <button
-            onClick={handleSearchById}
-            className="bg-purple-600 text-white px-4 py-2 rounded"
-          >
-            Search by ID
+            Search Tasks
           </button>
         </div>
 
@@ -169,30 +132,45 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Search Result */}
-        {searchResult && (
+        {/* Search Results */}
+        {searchResults.length > 0 && (
           <div className="border p-4 rounded bg-green-50 mt-4">
             <h2 className="text-lg font-semibold text-green-800">
-              Search Result:
+              Search Results:
             </h2>
-            <p>
-              <strong>ID:</strong> {searchResult.id} |{" "}
-              <strong>Title:</strong> {searchResult.title}
-            </p>
-            <p>
-              <strong>Status:</strong> {searchResult.status}
-            </p>
-            <p>
-              <strong>Created:</strong> {searchResult.createdAt}
-            </p>
-            <div className="mt-2">
-              <button
-                onClick={() => handleDelete(searchResult.id)}
-                className="bg-red-600 text-white px-3 py-1 rounded"
-              >
-                Delete This Task
-              </button>
-            </div>
+            <ul className="divide-y">
+              {searchResults.map((task) => (
+                <li
+                  key={task.id}
+                  className="p-2 flex justify-between items-center"
+                >
+                  <div>
+                    <p>
+                      <strong>ID:</strong> {task.id} |{" "}
+                      <strong>Title:</strong> {task.title}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      <strong>Status:</strong> {task.status} |{" "}
+                      <strong>Created:</strong> {task.createdAt}
+                    </p>
+                  </div>
+                  <div className="space-x-2">
+                    <button
+                      onClick={() => handleEdit(task)}
+                      className="text-yellow-600 font-semibold"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(task.id)}
+                      className="text-red-600 font-semibold"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
@@ -221,7 +199,7 @@ export default function Home() {
                       onClick={() => handleEdit(task)}
                       className="text-yellow-600 font-semibold"
                     >
-                      Edit Status
+                      Edit
                     </button>
                     <button
                       onClick={() => handleDelete(task.id)}
